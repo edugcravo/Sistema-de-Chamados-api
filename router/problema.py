@@ -7,15 +7,14 @@ from config.db import engine
 from model.tipo_problema import problema
 from typing import List
 
-problemas = APIRouter()
+problemas_router = APIRouter()
 
 
-@problemas.post("/problema/create")
+@problemas_router.post("/problema/create")
 def create_problema(problema_schema: ProblemaSchema):
   with engine.connect() as conn:
     try:
         tipo_problema = problema_schema.dict()
-        print(tipo_problema)
         conn.execute(problema.insert().values(tipo_problema))
         
         return {"status": 200, "message": "Tipo de problema cadastrado com sucesso"}
@@ -24,7 +23,7 @@ def create_problema(problema_schema: ProblemaSchema):
 
 
 
-@problemas.get("/problema/retorna-todos")
+@problemas_router.get("/problema/retorna-todos")
 def retorna_todos():
   with engine.connect() as conn:
     try:
