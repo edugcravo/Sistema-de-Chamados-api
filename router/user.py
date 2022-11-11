@@ -12,16 +12,12 @@ from typing import List, Optional
 
 user_router = APIRouter()
 
-@user_router.get("/")
-def root():
-  return {"message": "Hi, I am FastAPI with a router"}
 
 
 @user_router.get("/retorna_users", response_model=List[UserSchema])
 def get_users():
   with engine.connect() as conn:
     result = conn.execute(users.select()).fetchall() 
-
     return result
 
 
@@ -33,6 +29,7 @@ def get_user(user_id: str):
     return result
 
 
+#Tela de informacoes
 @user_router.get("/retorna_users_nome")
 def get_user(nome_user: str):
   with engine.connect() as conn:
@@ -46,6 +43,7 @@ def get_user(nome_user: str):
       else:
         nome_usuario = result[2]
         setor_usuario = result[5]
+        #Selecionando todos usuarios do setor
         users_setores = conn.execute(users.select().where(users.c.setor == setor_usuario, users.c.username != nome_usuario)).fetchall() 
         return {'usuario': result, 'usuarios_setores': users_setores}
     except:
@@ -73,12 +71,15 @@ def create_user(data_user: UserSchema):
 @user_router.post("/cria_tecnico", status_code=HTTP_201_CREATED)
 def create_user(data_user: TecnicoSchema):
   with engine.connect() as conn:
-    new_user = data_user.dict()
-    new_user["user_passw"] = generate_password_hash(data_user.user_passw, "pbkdf2:sha256:30", 30)
+    try:
+      new_user = data_user.dict()
+      new_user["user_passw"] = generate_password_hash(data_user.user_passw, "pbkdf2:sha256:30", 30)
 
-    conn.execute(tecnicos.insert().values(new_user))
+      conn.execute(tecnicos.insert().values(new_user))
 
-    return Response(status_code=HTTP_201_CREATED)
+      return {'data':Response(status_code=HTTP_201_CREATED), 'message': 'Tecnico criado com sucesso'}
+    except:
+      return {'message': 'Erro ao criar Tecnico'}
 
 
 
@@ -90,13 +91,21 @@ def user_login(data_user: DataUser):
 
 
     if result != None:
+      print(data_user.user_passw)
+      print(result)
       check_passw = check_password_hash(result[7], data_user.user_passw)
+      print(check_passw)
 
       if check_passw:
         return {
           "status": 200,
           "message": "Access success",
           "id": result[0]
+        }
+      else:
+        return{
+          "status": 401,
+          "message": "Access denied"
         }
 
     elif resultTecnico != None:
@@ -107,8 +116,12 @@ def user_login(data_user: DataUser):
           "status": 200,
           "message": "Access success",
           "tecnico": {"nome":resultTecnico[1], "id":resultTecnico[0]}
-          
         }
+      else:
+        return{
+            "status": 401,
+            "message": "Access denied"
+          }
     else:
       return {"status": HTTP_401_UNAUTHORIZED, "message": "Access denied"}
 
@@ -136,7 +149,7 @@ def delete_user(user_id: str):
 
 
 
-
+#Retorna todos os tecnicos
 @user_router.get("/retorna_tecnicos")
 def get_tecnicos():
   with engine.connect() as conn:

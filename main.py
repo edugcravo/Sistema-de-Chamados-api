@@ -3,6 +3,7 @@ from router.user import user_router
 from router.chamado import chamado_router
 from router.problema import problemas_router
 from router.acompanhamento import acompanhamentos_router
+from router.log import logs_router
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -20,4 +21,5 @@ app.add_middleware(
 app.include_router(user_router)
 app.include_router(chamado_router)
 app.include_router(problemas_router)
+app.include_router(logs_router)
 app.include_router(acompanhamentos_router)
