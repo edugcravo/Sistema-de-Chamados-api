@@ -36,12 +36,10 @@ def create_user(DataChamado: DataChamado):
     
         # Pegando o tipo de problema, para buscar o tecnico
         tipo_problema = conn.execute(problemas.select().where(problemas.c.id == DataChamado.tipo_problema)).first()
-        print(tipo_problema)
         tipo_problema = tipo_problema['tipo_problema']
 
         # Pegando o tecnico com a especialidade igual a do tipo do problema
         result = conn.execute(tecnicos.select().where(tecnicos.c.especialidade == tipo_problema)).first()
-        print(result)
 
         # Aumentando a quantidade de chamados do tecnico
         quantidade_chamados = result[5] + 1
@@ -55,7 +53,6 @@ def create_user(DataChamado: DataChamado):
         
 
         novo_chamado = DataChamado.dict()
-        print(novo_chamado)
         #Inserindo o chamado no banco
         conn.execute(chamados.insert().values(novo_chamado))
 

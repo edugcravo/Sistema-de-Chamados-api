@@ -3,7 +3,7 @@ from unittest import result
 from fastapi import APIRouter, Response
 from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_401_UNAUTHORIZED
 from schema.tecnico_schema import TecnicoSchema
-from schema.user_schema import UserSchema, DataUser
+from schema.user_schema import UserSchema, DataUser, DataUserImg
 from config.db import engine
 from model.users import users
 from model.tecnico import tecnicos
@@ -139,6 +139,15 @@ def update_user(data_update: UserSchema, user_id: str):
 
     return result
 
+
+@user_router.post("/update_image/", response_model=UserSchema)
+def update_user(data_update: DataUserImg, user_id: str):
+  with engine.connect() as conn:
+    conn.execute(users.update().values(img_perfil=data_update.img_perfil).where(users.c.id == user_id))
+
+    result = conn.execute(users.select().where(users.c.id == user_id)).first()
+
+    return result
 
 @user_router.delete("/deleta_user/{user_id}", status_code=HTTP_204_NO_CONTENT)
 def delete_user(user_id: str):

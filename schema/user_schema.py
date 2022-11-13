@@ -16,3 +16,7 @@ class UserSchema(BaseModel):
 class DataUser(BaseModel):
   username: str
   user_passw: str
+
+
+class DataUserImg(BaseModel):
+  img_perfil: str

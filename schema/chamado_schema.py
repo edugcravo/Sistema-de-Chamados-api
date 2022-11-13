@@ -13,6 +13,7 @@ class DataChamado(BaseModel):
   status: str
   id_tecnico: int
   id_usuario: int
+  arquivo: str
   data_hora_criacao: Optional[datetime]
 
 
