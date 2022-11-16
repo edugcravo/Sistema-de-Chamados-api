@@ -10,3 +10,5 @@ class TecnicoSchema(BaseModel):
   qtd_chamado: Optional[int]
 
 
+class DataTecnicoImg(BaseModel):
+  img_perfil: str
