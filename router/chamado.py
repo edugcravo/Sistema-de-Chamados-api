@@ -41,7 +41,6 @@ def create_user(DataChamado: DataChamado):
 
         # Pegando o tecnico com a especialidade igual a do tipo do problema
         result = conn.execute(tecnicos.select().where(tecnicos.c.especialidade == tipo_problema)).first()
-        print(result)
         # Aumentando a quantidade de chamados do tecnico
         quantidade_chamados = result['qtd_chamado'] + 1
 
@@ -49,15 +48,20 @@ def create_user(DataChamado: DataChamado):
         id_tecnico = result[0]
 
         DataChamado.id_tecnico = id_tecnico
-        DataChamado.data_hora_criacao = datetime.utcnow()
+        # DataChamado.data_hora_criacao = datetime.utcnow()
+        DataChamado.data_criacao = datetime.today().strftime('%Y-%m-%d')
+        DataChamado.data_finalizacao = '0000-00-00'
+        DataChamado.hora_criacao = datetime.today().strftime('%H:%M:%S')
+        DataChamado.hora_finalizacao = '00:00:00'
+
         DataChamado.status = 'em andamento'
-        
+
         novo_chamado = DataChamado.dict()
         #Inserindo o chamado no banco
         conn.execute(chamados.insert().values(novo_chamado))
 
         # Pegando chamado para obter id dele
-        chamado = conn.execute(chamados.select().where(chamados.c.id_equipamento == novo_chamado['id_equipamento'] and chamados.c.local == novo_chamado['local'] and chamados.c.ramal == novo_chamado['ramal'] and chamados.c.tipo_problema == novo_chamado['tipo_problema'] and chamados.c.desc_problema == novo_chamado['desc_problema'] and chamados.c.status == novo_chamado['status'] and chamados.c.id_tecnico == novo_chamado['id_tecnico'] and chamados.c.id_usuario == novo_chamado['id_usuario'] and chamados.c.data_hora_criacao == novo_chamado['data_hora_criacao'])).first()
+        chamado = conn.execute(chamados.select().where(chamados.c.id_equipamento == novo_chamado['id_equipamento'] and chamados.c.local == novo_chamado['local'] and chamados.c.ramal == novo_chamado['ramal'] and chamados.c.tipo_problema == novo_chamado['tipo_problema'] and chamados.c.desc_problema == novo_chamado['desc_problema'] and chamados.c.status == novo_chamado['status'] and chamados.c.id_tecnico == novo_chamado['id_tecnico'] and chamados.c.id_usuario == novo_chamado['id_usuario'])).first()
 
         acompanhamento_chamado = {
           'id_chamado': chamado[0],
@@ -144,10 +148,32 @@ def get_user(id_usuario: int):
 @chamado_router.post("/retorna-por-filtro")
 def get_filtro(dataChamado: filtroChamado):
   with engine.connect() as conn:
+    print(dataChamado)
 
-    result = (conn.execute(chamados.select().where(chamados.c.tipo_problema.in_(dataChamado.problema) & chamados.c.local.in_(dataChamado.setor)))).fetchall()
+    if dataChamado.problema == ['vazio']:
+      print('e vazio')
 
-    return {'chamado':result}
+    if dataChamado.problema != [''] and dataChamado.setor != ['']:
+      print('caiu no primeiro')
+      result = (conn.execute(chamados.select().where(chamados.c.tipo_problema.in_(dataChamado.problema) & chamados.c.local.in_(dataChamado.setor)))).fetchall()
+    elif dataChamado.problema == [''] and dataChamado.setor != ['']:
+      print('caiu no segundo')
+      result = (conn.execute(chamados.select().where(chamados.c.local.in_(dataChamado.setor)))).fetchall()
+    elif dataChamado.problema != [''] and dataChamado.setor == ['']:
+      print('caiu no terceiro')
+      result = (conn.execute(chamados.select().where(chamados.c.tipo_problema.in_(dataChamado.problema)))).fetchall()
+
+    user = []
+    problema = []
+
+    for i in result:
+      todos_usuarios = conn.execute(users.select().where(users.c.id == i['id_usuario'])).fetchall()
+      user.append(todos_usuarios[0]['nome'])
+
+      todos_problemas = conn.execute(problemas.select().where(problemas.c.id == i['tipo_problema'])).fetchall()
+      problema.append(todos_problemas[0]['tipo_problema'])
+
+    return {'chamado':result, 'nome_users': user, 'problemas': problema}
 
     
 
@@ -213,8 +239,10 @@ def update_user(data_update: editaChamado, id_chamado: int, tecnico: int):
 def update_user(data_update: cancelaChamado, id_chamado: int, tecnico: int):
   with engine.connect() as conn:
     try:
-      print(tecnico)
-      conn.execute(chamados.update().values(status=data_update.status).where(chamados.c.id == id_chamado))
+      data_update.data_finalizacao = datetime.today().strftime('%Y-%m-%d')
+      data_update.hora_finalizacao = datetime.today().strftime('%H:%M:%S')
+      print(data_update)
+      conn.execute(chamados.update().values(status=data_update.status, data_finalizacao=data_update.data_finalizacao, hora_finalizacao=data_update.hora_finalizacao).where(chamados.c.id == id_chamado))
 
       acompanhamento_chamado = {
           'id_chamado': id_chamado,

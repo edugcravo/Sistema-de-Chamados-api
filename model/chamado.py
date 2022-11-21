@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import Column, Table
-from sqlalchemy.sql.sqltypes import DateTime, Integer, String, VARCHAR
+from sqlalchemy.sql.sqltypes import DateTime, Integer, String, VARCHAR, Date, Time
 
 from config.db import engine, meta_data
 
@@ -17,7 +17,10 @@ chamados = Table("chamados", meta_data,
               Column("id_tecnico", Integer, nullable=False),
               Column("id_usuario", Integer, nullable=False),
               Column("arquivo",VARCHAR(255) , nullable=False),
-              Column("data_hora_criacao", DateTime, nullable=False),)
+              Column("data_criacao", Date, nullable=False),
+              Column("data_finalizacao", Date, nullable=False),
+              Column("hora_criacao", Time, nullable=False),
+              Column("hora_finalizacao", Time, nullable=False))
               
 
 

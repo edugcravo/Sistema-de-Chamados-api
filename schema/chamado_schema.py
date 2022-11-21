@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date, time
 from pydantic import BaseModel
 from typing import Optional
 
@@ -14,7 +14,11 @@ class DataChamado(BaseModel):
   id_tecnico: int
   id_usuario: int
   arquivo: str
-  data_hora_criacao: Optional[datetime]
+  data_criacao: Optional[date]
+  data_finalizacao: Optional[date]
+  hora_criacao: Optional[time]
+  hora_finalizacao: Optional[time]
+
 
 
 class editaChamado(BaseModel):
@@ -25,7 +29,9 @@ class editaChamado(BaseModel):
 
 class cancelaChamado(BaseModel):
   status: str
+  data_finalizacao: Optional[date]
+  hora_finalizacao: Optional[time]
 
 class filtroChamado(BaseModel):
-  problema: list
-  setor: list[str]
+  problema: Optional[list]
+  setor: Optional[list]

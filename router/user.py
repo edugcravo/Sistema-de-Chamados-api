@@ -7,6 +7,7 @@ from schema.user_schema import UserSchema, DataUser, DataUserImg
 from config.db import engine
 from model.users import users
 from model.tecnico import tecnicos
+from model.tipo_problema import problemas
 from werkzeug.security import generate_password_hash, check_password_hash
 from typing import List, Optional
 
@@ -48,6 +49,7 @@ def get_user(nome_user: str):
         return {'usuario': result, 'usuarios_setores': users_setores}
     except:
       return {'message': 'Erro ao buscar usuario'}
+
     
       
       
@@ -74,7 +76,8 @@ def create_user(data_user: TecnicoSchema):
     try:
       new_user = data_user.dict()
       new_user["user_passw"] = generate_password_hash(data_user.user_passw, "pbkdf2:sha256:30", 30)
-
+      
+      conn.execute(problemas.insert().values({'id':'', 'tipo_problema': data_user.especialidade}))
       conn.execute(tecnicos.insert().values(new_user))
 
       return {'data':Response(status_code=HTTP_201_CREATED), 'message': 'Tecnico criado com sucesso'}
