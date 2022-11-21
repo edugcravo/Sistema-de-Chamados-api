@@ -25,3 +25,7 @@ class editaChamado(BaseModel):
 
 class cancelaChamado(BaseModel):
   status: str
+
+class filtroChamado(BaseModel):
+  problema: list
+  setor: list[str]

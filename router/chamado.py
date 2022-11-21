@@ -15,7 +15,7 @@ from model.log import logs
 from model.tecnico import tecnicos
 from model.tipo_problema import problemas
 from model.users import users
-from schema.chamado_schema import DataChamado, cancelaChamado, editaChamado
+from schema.chamado_schema import DataChamado, cancelaChamado, editaChamado, filtroChamado
 
 chamado_router = APIRouter(
     prefix="/chamado",
@@ -137,6 +137,19 @@ def get_user(id_usuario: int):
     
     
     return {'chamado':result, 'tecnicos': ids_tecnicos}
+
+
+
+#Retorna todos os chamados por id do usuario
+@chamado_router.post("/retorna-por-filtro")
+def get_filtro(dataChamado: filtroChamado):
+  with engine.connect() as conn:
+
+    result = (conn.execute(chamados.select().where(chamados.c.tipo_problema.in_(dataChamado.problema) & chamados.c.local.in_(dataChamado.setor)))).fetchall()
+
+    return {'chamado':result}
+
+    
 
 
 @chamado_router.get("/retorna-chamados")
