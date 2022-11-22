@@ -101,7 +101,20 @@ def get_user(id_tecnico: str):
 
 
 
+#Retorna todos os chamados por  setor para o gestor
 
+@chamado_router.get("/retorna-setor")
+def get_user(setor: str):
+  with engine.connect() as conn:
+    result = conn.execute(chamados.select().where(chamados.c.local == setor)).fetchall()
+    ids_tecnicos = []
+    for i in result:
+      print(i)
+      todos_tecnicos = conn.execute(tecnicos.select().where(tecnicos.c.id == i[8])).fetchall()
+      ids_tecnicos.append(todos_tecnicos[0])
+    
+    
+    return {'chamado':result, 'tecnicos': ids_tecnicos}
 
 
 

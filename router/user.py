@@ -103,7 +103,9 @@ def user_login(data_user: DataUser):
         return {
           "status": 200,
           "message": "Access success",
-          "id": result[0]
+          "id": result[0],
+          "nivel": result['nivel'],
+          "setor": result['setor'],
         }
       else:
         return{
