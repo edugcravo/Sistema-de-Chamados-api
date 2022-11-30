@@ -15,7 +15,7 @@ from model.log import logs
 from model.tecnico import tecnicos
 from model.tipo_problema import problemas
 from model.users import users
-from schema.chamado_schema import DataChamado, cancelaChamado, editaChamado, filtroChamado
+from schema.chamado_schema import DataChamado, cancelaChamado, editaChamado, filtroChamado, filtroChamadoUser
 
 chamado_router = APIRouter(
     prefix="/chamado",
@@ -108,13 +108,15 @@ def get_user(setor: str):
   with engine.connect() as conn:
     result = conn.execute(chamados.select().where(chamados.c.local == setor)).fetchall()
     ids_tecnicos = []
+    ids_usuarios = []
     for i in result:
       print(i)
       todos_tecnicos = conn.execute(tecnicos.select().where(tecnicos.c.id == i[8])).fetchall()
       ids_tecnicos.append(todos_tecnicos[0])
+      todos_usuarios = conn.execute(users.select().where(users.c.id == i[9])).fetchall()
+      ids_usuarios.append(todos_usuarios[0])
     
-    
-    return {'chamado':result, 'tecnicos': ids_tecnicos}
+    return {'chamado':result, 'tecnicos': ids_tecnicos, 'usuarios': ids_usuarios}
 
 
 
@@ -190,6 +192,38 @@ def get_filtro(dataChamado: filtroChamado):
 
     
 
+#Retorna todos os chamados por id do usuario
+@chamado_router.post("/retorna-por-filtro-usuario")
+def get_filtro_usuario(dataChamado: filtroChamadoUser):
+  with engine.connect() as conn:
+    print(dataChamado)
+
+    print(dataChamado.nome)
+
+    result = (conn.execute(chamados.select().where(chamados.c.id_usuario.in_(dataChamado.nome) ))).fetchall()
+
+    
+
+    user = []
+    tecnico = []
+    for i in result:
+      if i['local'] != dataChamado.setor:
+        result.remove(i)
+    
+    for i in result:
+      todos_usuarios = conn.execute(users.select().where(users.c.id == i['id_usuario'])).first()
+      
+      todos_tecnicos = conn.execute(tecnicos.select().where(tecnicos.c.id == i['id_tecnico'])).first()
+
+
+      user.append(todos_usuarios['nome'])
+      tecnico.append(todos_tecnicos['nome'])
+
+      
+          
+
+
+    return {'chamado':result, 'usuarios': user, 'tecnicos': tecnico}
 
 @chamado_router.get("/retorna-chamados")
 def get_user():

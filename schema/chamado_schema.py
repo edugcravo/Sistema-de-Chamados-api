@@ -35,3 +35,7 @@ class cancelaChamado(BaseModel):
 class filtroChamado(BaseModel):
   problema: Optional[list]
   setor: Optional[list]
+
+class filtroChamadoUser(BaseModel):
+  nome: Optional[list]
+  setor: str

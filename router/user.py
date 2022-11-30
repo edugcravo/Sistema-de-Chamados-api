@@ -51,7 +51,16 @@ def get_user(nome_user: str):
       return {'message': 'Erro ao buscar usuario'}
 
     
+
+@user_router.get("/retorna_users_setor")
+def get_user(setor: str):
+  with engine.connect() as conn:
+    try:
+      result = conn.execute(users.select().where(users.c.setor == setor)).fetchall()
       
+      return {'usuarios_setores': result}
+    except:
+      return {'message': 'Erro ao buscar usuario'}
       
     
 
